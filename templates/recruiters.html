@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Рекрутеры - hr партнер{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-column flex-md-row">
+    <h1 class="mb-3 mb-md-0"><i class="fas fa-users"></i> Управление рекрутерами</h1>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRecruiterModal">
+        <i class="fas fa-user-plus"></i> Добавить рекрутера
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if recruiters %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ФИО</th>
+                        <th class="d-none d-md-table-cell">Телефон</th>
+                        <th class="d-none d-sm-table-cell">Логин</th>
+                        <th class="d-none d-lg-table-cell">Дата регистрации</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for recruiter in recruiters %}
+                    <tr>
+                        <td>
+                            <strong>{{ recruiter.full_name }}</strong>
+                            <div class="d-md-none text-muted small">
+                                {{ recruiter.phone }}<br>
+                                {{ recruiter.username }}
+                            </div>
+                        </td>
+                        <td class="d-none d-md-table-cell">{{ recruiter.phone }}</td>
+                        <td class="d-none d-sm-table-cell">{{ recruiter.username }}</td>
+                        <td class="d-none d-lg-table-cell">{{ recruiter.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-warning" 
+                                        data-bs-toggle="modal" data-bs-target="#editRecruiterModal"
+                                        data-id="{{ recruiter.id }}"
+                                        data-fullname="{{ recruiter.full_name }}"
+                                        data-phone="{{ recruiter.phone }}"
+                                        data-username="{{ recruiter.username }}"
+                                        title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <a href="{{ url_for('delete_recruiter', id=recruiter.id) }}" 
+                                   class="btn btn-outline-danger"
+                                   onclick="return confirmDelete('Вы уверены, что хотите удалить этого рекрутера?')"
+                                   title="Удалить">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Рекрутеры не найдены</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Модальные окна остаются без изменений -->
+<div class="modal fade" id="addRecruiterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить рекрутера</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('add_recruiter') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">ФИО *</label>
+                        <input type="text" class="form-control" name="full_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Телефон *</label>
+                        <input type="text" class="form-control" name="phone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Логин *</label>
+                        <input type="text" class="form-control" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Пароль *</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editRecruiterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактировать рекрутера</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editRecruiterForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">ФИО *</label>
+                        <input type="text" class="form-control" name="full_name" id="editFullName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Телефон *</label>
+                        <input type="text" class="form-control" name="phone" id="editPhone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Логин *</label>
+                        <input type="text" class="form-control" name="username" id="editUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Новый пароль (оставьте пустым, если не нужно менять)</label>
+                        <input type="password" class="form-control" name="password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('editRecruiterModal').addEventListener('show.bs.modal', function(event) {
+    const button = event.relatedTarget;
+    const recruiterId = button.getAttribute('data-id');
+    const fullName = button.getAttribute('data-fullname');
+    const phone = button.getAttribute('data-phone');
+    const username = button.getAttribute('data-username');
+    
+    document.getElementById('editFullName').value = fullName;
+    document.getElementById('editPhone').value = phone;
+    document.getElementById('editUsername').value = username;
+    
+    document.getElementById('editRecruiterForm').action = '/edit_recruiter/' + recruiterId;
+});
+</script>
+{% endblock %}
